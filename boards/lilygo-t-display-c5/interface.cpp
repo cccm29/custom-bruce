@@ -25,10 +25,16 @@
 Adafruit_seesaw ss;
 int32_t last_encoder_pos = 0;
 bool seesaw_ready = false;
+bool wire_initialized = false;
 
 void initAnoEncoder () {
-    Wire.begin(2, 3);
-    if (ss.begin(SEESAW_ADDR)) {
+    if (!wire_initilized) {
+        Wire.begin(2, 3);
+        Wire.setClock(100000);
+        wire_initialized = true;
+    }
+
+    if (ss.begin(SEESAW_ADDR, false)) {
         ss.pinMode(SS_SWITCH_UP, INPUT_PULLUP);
         ss.pinMode(SS_SWITCH_DOWN, INPUT_PULLUP);
         ss.pinMode(SS_SWITCH_LEFT, INPUT_PULLUP);
@@ -104,7 +110,6 @@ void _setup_gpio() {
 
     pinMode(TFT_CS, OUTPUT);
     digitalWrite(TFT_CS, HIGH);
-initAnoEncoder();
 }
 
 /***************************************************************************************
