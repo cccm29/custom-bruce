@@ -150,16 +150,23 @@ void InputHandler(void) {
         initAnoEncoder();
     }
 
-    if (seesaw_ready) {
+   if (seesaw_ready) {
         static bool lastAnoSel = false;
         static bool lastAnoEsc = false;
+        static bool lastAnoUp = false;
+        static bool lastAnoDown = false;
+        static bool lastAnoRight = false;
 
         int32_t new_pos = ss.getEncoderPosition();
         bool anoSel = !ss.digitalRead(SS_SWITCH_SELECT);
-        bool anoEsc = !ss.digitalRead(SS_SWITCH_LEFT);
+        bool anoEsc = !ss.digitalRead(SS_SWITCH_LEFT);   // Left / Esc
+        bool anoUp = !ss.digitalRead(SS_SWITCH_UP);
+        bool anoDown = !ss.digitalRead(SS_SWITCH_DOWN);
+        bool anoRight = !ss.digitalRead(SS_SWITCH_RIGHT);
 
         wakeUpScreen(); // Always ensure screen wakes up on any input
 
+        // Rotary encoder rotation
         if (new_pos != last_encoder_pos) {
             if (new_pos > last_encoder_pos) {
                 DownPress = true;
@@ -172,20 +179,19 @@ void InputHandler(void) {
             AnyKeyPress = true;
         }
 
-        if (anoSel && !lastAnoSel) {
-            SelPress = true;
-            AnyKeyPress = true;
-        }
-        if (anoEsc && !lastAnoEsc) {
-            EscPress = true;
-            AnyKeyPress = true;
-        }
+        // Button presses
+        if (anoSel && !lastAnoSel) { SelPress = true; AnyKeyPress = true; }
+        if (anoEsc && !lastAnoEsc) { EscPress = true; LeftPress = true; AnyKeyPress = true; }
+        if (anoUp && !lastAnoUp) { UpPress = true; AnyKeyPress = true; }
+        if (anoDown && !lastAnoDown) { DownPress = true; AnyKeyPress = true; }
+        if (anoRight && !lastAnoRight) { RightPress = true; AnyKeyPress = true; }
 
         lastAnoSel = anoSel;
         lastAnoEsc = anoEsc;
+        lastAnoUp = anoUp;
+        lastAnoDown = anoDown;
+        lastAnoRight = anoRight;
     }
-}
-
 /*********************************************************************
 ** Function: powerOff
 **********************************************************************/
