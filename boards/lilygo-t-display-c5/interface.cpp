@@ -139,6 +139,12 @@ void _setBrightness(uint8_t brightval) {
 void InputHandler(void) {
     hal_buttons_poll_2();
 
+    static unsigned long lastRetry = 0;
+    if (!seesaw_ready && millis() - lastRetry > 1000) {
+        lastRetry = millis();
+        initAnoEncoder();
+    }
+
     if (seesaw_ready) {
         static bool lastAnoSel = false;
         static bool lastAnoEsc = false;
