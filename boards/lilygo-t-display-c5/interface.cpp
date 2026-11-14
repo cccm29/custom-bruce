@@ -142,15 +142,12 @@ void _setBrightness(uint8_t brightval) {
 ** BTN_A (0)  -> Prev (click) / Esc (double click or hold)
 **********************************************************************/
 void InputHandler(void) {
-    hal_buttons_poll_2();
-
-    static unsigned long lastRetry = 0;
     if (!seesaw_ready && millis() - lastRetry > 1000) {
         lastRetry = millis();
         initAnoEncoder();
     }
 
-   if (seesaw_ready) {
+    if (seesaw_ready) {
         static bool lastAnoSel = false;
         static bool lastAnoEsc = false;
         static bool lastAnoUp = false;
@@ -179,12 +176,12 @@ void InputHandler(void) {
             AnyKeyPress = true;
         }
 
-        // Button presses
+        // Button presses using Bruce's existing variables
         if (anoSel && !lastAnoSel) { SelPress = true; AnyKeyPress = true; }
-        if (anoEsc && !lastAnoEsc) { EscPress = true; LeftPress = true; AnyKeyPress = true; }
+        if (anoEsc && !lastAnoEsc) { EscPress = true; PrevPress = true; AnyKeyPress = true; }
         if (anoUp && !lastAnoUp) { UpPress = true; AnyKeyPress = true; }
         if (anoDown && !lastAnoDown) { DownPress = true; AnyKeyPress = true; }
-        if (anoRight && !lastAnoRight) { RightPress = true; AnyKeyPress = true; }
+        if (anoRight && !lastAnoRight) { NextPress = true; AnyKeyPress = true; }
 
         lastAnoSel = anoSel;
         lastAnoEsc = anoEsc;
@@ -192,6 +189,7 @@ void InputHandler(void) {
         lastAnoDown = anoDown;
         lastAnoRight = anoRight;
     }
+}
 /*********************************************************************
 ** Function: powerOff
 **********************************************************************/
