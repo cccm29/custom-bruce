@@ -28,7 +28,7 @@ bool seesaw_ready = false;
 bool wire_initialized = false;
 
 void initAnoEncoder () {
-    if (!wire_initilized) {
+    if (!wire_initialized) {
         Wire.begin(2, 3);
         Wire.setClock(100000);
         wire_initialized = true;
