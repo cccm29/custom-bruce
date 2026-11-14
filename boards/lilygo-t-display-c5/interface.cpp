@@ -142,6 +142,8 @@ void _setBrightness(uint8_t brightval) {
 ** BTN_A (0)  -> Prev (click) / Esc (double click or hold)
 **********************************************************************/
 void InputHandler(void) {
+    static unsigned long lastRetry = 0;
+
     if (!seesaw_ready && millis() - lastRetry > 1000) {
         lastRetry = millis();
         initAnoEncoder();
