@@ -158,15 +158,8 @@ void InputHandler(void) {
         bool anoSel = !ss.digitalRead(SS_SWITCH_SELECT);
         bool anoEsc = !ss.digitalRead(SS_SWITCH_LEFT);
 
-        if (new_pos != last_encoder_pos || anoSel || anoEsc) {
-            if (!wakeUpScreen()) {
-                AnyKeyPress = true;
-                last_encoder_pos = new_pos;
-                lastAnoSel = anoSel;
-                lastAnoEsc = anoEsc;
-                return;
-            }
-        }
+        wakeUpScreen(); // Always ensure screen wakes up on any input
+
         if (new_pos != last_encoder_pos) {
             if (new_pos > last_encoder_pos) {
                 DownPress = true;
@@ -176,9 +169,17 @@ void InputHandler(void) {
                 PrevPress = true;
             }
             last_encoder_pos = new_pos;
+            AnyKeyPress = true;
         }
-        if (anoSel && !lastAnoSel) { SelPress = true; }
-        if (anoEsc && !lastAnoEsc) { EscPress = true; }
+
+        if (anoSel && !lastAnoSel) {
+            SelPress = true;
+            AnyKeyPress = true;
+        }
+        if (anoEsc && !lastAnoEsc) {
+            EscPress = true;
+            AnyKeyPress = true;
+        }
 
         lastAnoSel = anoSel;
         lastAnoEsc = anoEsc;
