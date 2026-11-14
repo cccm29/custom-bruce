@@ -12,6 +12,32 @@
 ** LILYGO T-Display-C5 — Bruce board interface
 ** ST7789 170x320 (no touch), two physical buttons (IO0 + BOOT).
 ***************************************************************************************/
+#include <Wire.h>
+#include "Adafruit_seesaw.h"
+
+#define SS_SWITCH_SELECT 1
+#define SS_SWITCH_UP 2
+#define SS_SWITCH_LEFT 3
+#define SS_SWITCH_DOWN 4
+#define SS_SWITCH_RIGHT 5
+#define SEESAW_ADDR 0x49
+
+Adafruit_seesaw ss;
+int32_t last_encoder_pos = 0;
+bool seesaw_ready = false;
+
+void initAnoEncoder () {
+    Wire.begin(2, 3);
+    if (ss.begin(SEESAW_ADDR)) {
+        ss.pinMode(SS_SWITCH_UP, INPUT_PULLUP);
+        ss.pinMode(SS_SWITCH_DOWN, INPUT_PULLUP);
+        ss.pinMode(SS_SWITCH_LEFT, INPUT_PULLUP);
+        ss.pinMode(SS_SWITCH_RIGHT, INPUT_PULLUP);
+        ss.pinMode(SS_SWITCH_SELECT, INPUT_PULLUP);
+        last_encoder_pos = ss.getEncoderPosition();
+        seesaw_ready = true;
+    }
+}
 
 /***************************************************************************************
 ** Function name: _setup_gpio()
@@ -78,6 +104,7 @@ void _setup_gpio() {
 
     pinMode(TFT_CS, OUTPUT);
     digitalWrite(TFT_CS, HIGH);
+initAnoEncoder();
 }
 
 /***************************************************************************************
@@ -109,7 +136,43 @@ void _setBrightness(uint8_t brightval) {
 ** BTN_B (28) -> Next (click) / Sel (double click or hold)
 ** BTN_A (0)  -> Prev (click) / Esc (double click or hold)
 **********************************************************************/
-void InputHandler(void) { hal_buttons_poll_2(); }
+void InputHandler(void) {
+    hal_buttons_poll_2();
+
+    if (seesaw_ready) {
+        static bool lastAnoSel = false;
+        static bool lastAnoEsc = false;
+
+        int32_t new_pos = ss.getEncoderPosition();
+        bool anoSel = !ss.digitalRead(SS_SWITCH_SELECT);
+        bool anoEsc = !ss.digitalRead(SS_SWITCH_LEFT);
+
+        if (new_pos != last_encoder_pos || anoSel || anoEsc) {
+            if (!wakeUpScreen()) {
+                AnyKeyPress = true;
+                last_encoder_pos = new_pos;
+                lastAnoSel = anoSel;
+                lastAnoEsc = anoEsc;
+                return;
+            }
+        }
+        if (new_pos != last_encoder_pos) {
+            if (new_pos > last_encoder_pos) {
+                DownPress = true;
+                NextPress = true;
+            } else {
+                UpPress = true;
+                PrevPress = true;
+            }
+            last_encoder_pos = new_pos;
+        }
+        if (anoSel && !lastAnoSel) { SelPress = true; }
+        if (anoEsc && !lastAnoEsc) { EscPress = true; }
+
+        lastAnoSel = anoSel;
+        lastAnoEsc = anoEsc;
+    }
+}
 
 /*********************************************************************
 ** Function: powerOff
